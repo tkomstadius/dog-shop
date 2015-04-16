@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<!--  ng-app is a directive that creates an Angular application by running
+the store-module when the document loads. --> 
+<html ng-app="store">
+
+  <head>
+    <title>Fluffy Puppy</title>
+    <!-- linking the css stylesheet downloaded from getbootstrap.com -->
+    <link rel="stylesheet" type="text/css" href="bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="fluffy_style.css" />
+    <!-- linking the library downloaded from angularjs.org -->
+    <script type="text/javascript" src="angular.min.js"></script>
+    <!-- linking our module, just by including it it is going to treat the 
+    html inside of this element as part of the angular app -->
+    <script type="text/javascript" src="app.js"></script>
+  </head>
+ 
+  <!-- ng-controller attaches our controller to this element and as 
+  sets the controller to the alias store in our html document -->
+  <body ng-controller="StoreController as store">
+  
+  <!-- HEADER FOR THE PAGE -->
+  <header>
+    <h1 class="text-center">Fluffy central</h1>
+    <h2 class="text-center">Buy one! I promise you will be happy!</h2>
+  </header>
+
+  <!-- PRODUCTS CONTAINER -->
+  <div class="list-group">
+    <!-- expression, let us insert dynamic values -->
+    <!-- <p>{{"hello" + " you"}}</p> -->
+    <div class="list-group-item" ng-repeat="product in store.products">
+      <h3>{{product.name}} <!-- Product Name -->
+        <!-- pipe, take the first expression and put into the second 
+        expression. currency is a filter that gives a desired format -->
+        <!-- there are a lot of filters that are used accordingly;
+        {{data | filter:options}}. filters are used to get correct format, limit number of displayed charaters or objects, transform to 
+        uppercase, order by and so on -->
+        <em class="pull-right">{{product.price | currency}}</em>
+      </h3>
+
+      <!-- IMAGE GALLERY -->
+      <div ng-controller="GalleryController as gallery" ng-show="product.images.length">
+        <div class="img-wrap">
+          <!-- only the src wont work here because the browser tries to 
+          load the image before the expression evaluates, we must use a 
+          directive instead, the ng-src -->
+          <img ng-src="{{product.images[gallery.current].full}}"/>
+        </div>
+        <ul class="img-thumbnails clearfix">
+          <li class="small-image pull-left thumbnail" ng-repeat="image in product.images">
+            <img src="{{image.thumb}}"/>
+          </li>
+        </ul>
+      </div>
+        <!-- <p>{{product.description}}</p> --> <!-- Product Description -->
+        <!-- button should only show if a specified variable is true,
+        use show directive with a specified expression -->
+        <button ng-show="product.canPurchase"> Add to Cart</button> 
+        <!-- give the expression tab an initial value with ng-init, which is great for prototyping but the initialization should really be inside of a controller. We add this to our PanelController instead -->
+        <section ng-controller="PanelController as panel">
+          <ul class="nav nav-pills">
+            <!-- ng-class is used to detect which tab is selected and then 
+            add a class to that, we send an object to ng-class
+            active is the name of the class we want to set and tab === is the expression to evaluate. If the expression is true set the class 
+            to active -->
+            <li ng-class="{active: panel.isSelected(1)}">
+              <!-- to choose and make one item active we can use the angular 
+              ng-click directive which takes an expression to evaluate. This expression will be assigned the value that we set, when moving 
+              the logic code into a controller instead we call a function to 
+              set the property -->
+              <a href ng-click="panel.selectTab(1)">Description</a>
+            </li>
+            <li ng-class="{active: panel.isSelected(2)}">
+              <a href ng-click="panel.selectTab(2)">Specifications</a>
+            </li>
+            <li ng-class="{active: panel.isSelected(3)}">
+              <a href ng-click="panel.selectTab(3)">Reviews</a>
+            </li>
+            <!-- tab gets updated when we click on the different tabs. Expressions like this defines a 2-way Data Binding and tthis 
+            means that the expression gets re-evaluated when a property 
+            changes -->
+            <!-- {{tab}} -->
+          </ul>
+          <div class="panel" ng-show="panel.isSelected(1)">
+              <h4>Description</h4>
+              <p>{{product.description}}</p>
+          </div>
+          <div class="panel" ng-show="panel.isSelected(2)">
+              <h4>Specifications</h4>
+              <blockquote>None yet</blockquote>
+          </div>
+          <div class="panel" ng-show="panel.isSelected(3)">
+            <!-- PRODUCT REVIEWS LIST -->
+            <ul>
+              <h4>Reviews</h4>
+              <li ng-repeat="review in product.reviews">
+                <blockquote>
+                  <strong>{{review.stars}} Stars</strong>
+                  <p>{{review.body}}</p>
+                  <cite class="clearfix">-{{review.author}}</cite>-->
+                </blockquote>
+              </li>
+            </ul>
+
+            <!-- THIS SHOULD BE A LIVE PREVIEW -->
+            <!-- ng-submit allows us to call a function when the form is submitted -->
+            <!-- turn off default html validation with novalidation -->
+            <!-- prevent submission if the form is not valid -->
+            <form name="reviewForm" ng-controller="ReviewController as reviewCtrl" ng-submit="reviewForm.$valid && reviewCtrl.addReview(product)" novalidate>
+              <blockquote ng-show="reviewCtrl.review">
+                <strong>{{reviewCtrl.review.stars}} Stars</strong>
+                <p>{{reviewCtrl.review.body}}</p> 
+                <cite class="clearfix">-{{reviewCtrl.review.author}}</cite>
+              </blockquote>
+              <!-- ng-model binds the form element value to the property -->
+              <!-- THIS IS THE ACTUAL REVIEW FORM -->
+              <h4>Submit a Review</h4>
+              <fieldset class="form-group">
+                <!-- required tells us that this must be added in the form -->
+                <select class="form-control" ng-model="reviewCtrl.review.stars" ng-options="stars for stars in [5,4,3,2,1]" title="Stars" required>
+                  <option value="">Rate the product</option>
+                </select>
+              </fieldset>
+              <fieldset class="form-group">
+                <textarea class="form-control" ng-model="reviewCtrl.review.body" placeholder="Write a short review of the product..." title="Review" required></textarea>
+              </fieldset>
+              <fieldset class="form-group">
+                <input type="email" class="form-control" ng-model="reviewCtrl.review.author" placeholder="foo@bar.com" title="email" required/>
+              </fieldset>
+              <fieldset class="form-group">
+              <!-- SOME DEBUGGING -->
+              <!-- reviewForm is the name that is set in form, $means we are referencing a built in angular property of the form --> 
+              <div>reviewForm is {{reviewForm.$valid}}</div>
+              <input type="submit" class="btn btn-primary pull-right" value="Submit Review"/>
+              </fieldset>
+            </form>
+          </div>
+        </section>
+      </div>
+    </div>
+  </body>
+
+</html>

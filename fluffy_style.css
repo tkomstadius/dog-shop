@@ -1,0 +1,10 @@
+/* angular gives us the help with changing classes depending on the 
+objects current status, this default magic we can use to create 
+feedback for the user using css. */
+.ng-invalid.ng-dirty {
+  border-color: #FA787E;
+}
+
+.ng-valid.ng-dirty {
+  border-color: #78FA89;
+}
